@@ -8,10 +8,17 @@ const WHATSAPP_NUMBER = '918921263343';
 export const whatsappContactUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent('Hello, I would like to enquire about Elanex Spices.')}`;
 export const whatsappEnquiryUrl = (productName: string) =>
   `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(`Hello, I would like to enquire about this product: ${productName}.`)}`;
+export const whatsappContactFormUrl = (payload: {
+  name: string;
+  email: string;
+  phone: string;
+  message: string;
+}) =>
+  `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
+    `Hello, I would like to enquire about Elanex Spices.\n\nName: ${payload.name}\nEmail: ${payload.email}\nPhone: ${payload.phone}\nMessage: ${payload.message}`,
+  )}`;
 export function metadata(title: string, description: string) { const pageTitle = title === 'Elanex Spices' ? title : `Elanex Spices | ${title}`; return { meta: [{ title: pageTitle }, { name: 'description', content: description }, { property: 'og:title', content: pageTitle }, { property: 'og:description', content: description }, { property: 'og:type', content: 'website' }, { name: 'twitter:card', content: 'summary_large_image' }] }; }
 
-const API_BASE_URL =
-  import.meta.env["VITE_API_BASE_URL"] ?? "http://127.0.0.1:8000/api";
 const SANITY_PROJECT_ID = import.meta.env["VITE_SANITY_PROJECT_ID"];
 const SANITY_DATASET = import.meta.env["VITE_SANITY_DATASET"] ?? "production";
 const SANITY_API_VERSION = import.meta.env["VITE_SANITY_API_VERSION"] ?? "2025-01-01";
@@ -40,18 +47,6 @@ const PRODUCTS_QUERY = `*[
 
 let productsRequest: Promise<Product[]> | null = null;
 
-function fetchProductsFromDjango(): Promise<Product[]> {
-  return fetch(`${API_BASE_URL}/products/`, {
-    headers: { Accept: "application/json" },
-    cache: "no-store",
-  }).then(async (response) => {
-    if (!response.ok) {
-      throw new Error(`Product request failed with status ${response.status}`);
-    }
-    return (await response.json()) as Product[];
-  });
-}
-
 function fetchProductsFromSanity(): Promise<Product[]> {
   if (!sanityClient) {
     return Promise.reject(new Error("Sanity is not configured."));
@@ -63,7 +58,7 @@ export function fetchProducts(): Promise<Product[]> {
   if (!productsRequest) {
     productsRequest = (sanityClient
       ? fetchProductsFromSanity()
-      : fetchProductsFromDjango())
+      : Promise.reject(new Error("Sanity is not configured.")))
       .then((data) => {
         products = data;
         return data;

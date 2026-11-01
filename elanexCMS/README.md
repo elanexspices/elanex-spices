@@ -64,14 +64,13 @@ VITE_SANITY_DATASET=production
 VITE_SANITY_API_VERSION=2025-01-01
 ```
 
-When `VITE_SANITY_PROJECT_ID` is set, the frontend reads products from Sanity.
-When it is empty, the current Django product API remains available as a
-temporary fallback during migration.
+The frontend reads products from Sanity. Set all three variables in Vercel
+before deploying the frontend.
 
 ## Import the existing products
 
 Create a Sanity API token with permission to create and update documents. Then
-run this from `elanexCMS` while the existing Django API is still available:
+run this from `elanexCMS` while the existing product data source is still available:
 
 ```powershell
 $env:SANITY_PROJECT_ID="your-project-id"
