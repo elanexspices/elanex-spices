@@ -84,3 +84,21 @@ npm run import:products
 The script imports product metadata and uploads each existing product image to
 Sanity. The token is used only locally and must never be added to Git or
 frontend/Vercel environment variables.
+
+## Add the flyer price list
+
+To create the 19 grade/size records from the flyer in one operation, create a
+Sanity API token with permission to create and update documents, then run:
+
+```powershell
+$env:SANITY_PROJECT_ID="5tugpqtz"
+$env:SANITY_DATASET="production"
+$env:SANITY_API_TOKEN="your-write-token"
+npm run seed:flyer-products
+```
+
+The records are created under the correct quality groups with the flyer prices
+and are hidden initially. In the Studio, open each record, upload its product
+image, review the price, turn on **Show on website**, and publish it. The
+frontend will then place it in the matching Export Quality, Domestic Quality,
+or Rejection / Mix section.
