@@ -53,6 +53,7 @@ for (const product of products) {
       asset: { _type: "reference", _ref: asset._id },
     },
     category: product.category,
+    qualityGroup: "export",
     available: true,
   });
 
