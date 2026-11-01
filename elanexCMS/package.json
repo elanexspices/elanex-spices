@@ -5,7 +5,8 @@
     "dev": "sanity dev",
     "build": "sanity build",
     "deploy": "sanity deploy",
-    "import:products": "node scripts/import-products.mjs"
+    "import:products": "node scripts/import-products.mjs",
+    "seed:flyer-products": "node scripts/seed-flyer-products.mjs"
   },
   "dependencies": {
     "@sanity/client": "^8.14.1",
