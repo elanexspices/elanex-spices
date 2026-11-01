@@ -10,7 +10,7 @@
 <!-- LOVABLE:END -->
 
 ## Storefront architecture
-- Use TanStack Start file-based routes and shared storefront components; the supported platform does not run Next.js or Django.
+- Use TanStack Start file-based routes and shared storefront components; product content comes from Sanity and enquiries open WhatsApp.
 - Keep the initial catalog and cart client-side with no real order submission or payment collection; production commerce requires a connected service and verified business details.
 - Keep product data and cart logic in client-safe shared modules so every shopping page uses the same prices and quantities.
 - Render the supplied brand image through the shared storefront Brand component so header and footer stay consistent without recreating its typography.
