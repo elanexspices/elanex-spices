@@ -30,8 +30,10 @@ npm run dev
 ```
 
 Open the local Studio URL shown in the terminal and sign in with the Sanity
-account. Add a product under **Product**. Product fields include name, URL ID,
-description, indicative price, image, category, display order, and visibility.
+account. Add a product under **Product**. Product fields include name, URL ID, description, indicative price, image,
+category, display order, visibility, and an optional grade-based price list.
+The price list can contain separate Export Quality, Domestic Quality, and
+Rejection / Mix sections, each with grade/size and price per kilogram rows.
 
 If the Studio shows **This studio is not registered and cannot access your
 content yet**, verify all of the following:

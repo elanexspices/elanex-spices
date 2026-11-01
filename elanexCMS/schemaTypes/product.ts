@@ -34,6 +34,85 @@ export default defineType({
       validation: (rule) => rule.required().min(0.01),
     }),
     defineField({
+      name: "priceTiers",
+      title: "Price list",
+      type: "array",
+      description: "Optional grade-based prices shown on the product page.",
+      of: [
+        {
+          type: "object",
+          name: "priceTier",
+          title: "Quality tier",
+          fields: [
+            defineField({
+              name: "title",
+              title: "Section title",
+              type: "string",
+              options: {
+                list: [
+                  {title: "Export Quality", value: "Export Quality"},
+                  {title: "Domestic Quality", value: "Domestic Quality"},
+                  {title: "Rejection / Mix", value: "Rejection / Mix"},
+                ],
+              },
+              validation: (rule) => rule.required(),
+            }),
+            defineField({
+              name: "subtitle",
+              title: "Subtitle",
+              type: "string",
+              description: "For example: Premium quality for global market.",
+            }),
+            defineField({
+              name: "rows",
+              title: "Grade prices",
+              type: "array",
+              of: [
+                {
+                  type: "object",
+                  name: "priceRow",
+                  title: "Grade price",
+                  fields: [
+                    defineField({
+                      name: "grade",
+                      title: "Grade / size",
+                      type: "string",
+                      validation: (rule) => rule.required(),
+                    }),
+                    defineField({
+                      name: "price",
+                      title: "Price (₹ / kg)",
+                      type: "number",
+                      validation: (rule) => rule.required().min(0.01),
+                    }),
+                  ],
+                  preview: {
+                    select: {
+                      title: "grade",
+                      subtitle: "price",
+                    },
+                    prepare({title, subtitle}) {
+                      return {
+                        title,
+                        subtitle: subtitle ? `₹${subtitle} / kg` : "",
+                      };
+                    },
+                  },
+                },
+              ],
+              validation: (rule) => rule.min(1),
+            }),
+          ],
+          preview: {
+            select: {
+              title: "title",
+              subtitle: "subtitle",
+            },
+          },
+        },
+      ],
+    }),
+    defineField({
       name: "image",
       title: "Product image",
       type: "image",
