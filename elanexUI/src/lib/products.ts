@@ -1,6 +1,8 @@
 import { createClient } from "@sanity/client";
 
-export type Product = { id: string; name: string; description: string | null; price: number; image: string; category: 'cardamom' | 'seeds' };
+export type PriceRow = { grade: string; price: number };
+export type PriceTier = { title: string; subtitle?: string; rows: PriceRow[] };
+export type Product = { id: string; name: string; description: string | null; price: number; image: string; category: 'cardamom' | 'seeds'; priceTiers?: PriceTier[] };
 export let products: Product[] = [];
 export const money = (amount: number) => '₹' + amount.toLocaleString('en-IN');
 const WHATSAPP_NUMBER = '918921263343';
@@ -33,7 +35,15 @@ const PRODUCTS_QUERY = `*[
   description,
   price,
   "image": image.asset->url,
-  category
+  category,
+  priceTiers[] {
+    title,
+    subtitle,
+    rows[] {
+      grade,
+      price
+    }
+  }
 }`;
 
 let productsRequest: Promise<Product[]> | null = null;
