@@ -6,9 +6,8 @@ cultivator and seller.
 Tech stack:
 
 - Frontend: Vite, React, TypeScript, and TanStack Router
-- Backend: Django and Django REST Framework
-- Database: Supabase PostgreSQL
-- Storage: Supabase Storage
+- Product CMS: Sanity
+- WhatsApp-based contact enquiries
 
 This project was built with [Lovable](https://lovable.dev) and uses Vite,
 TanStack Router, and React.
@@ -36,17 +35,18 @@ npm install
 npm run dev
 ```
 
-The frontend calls the Django backend health endpoint using
-`VITE_API_BASE_URL`. Copy `.env.example` to `.env` for the local default:
+Products are read from Sanity when `VITE_SANITY_PROJECT_ID` is configured.
+Copy `.env.example` to `.env` for the local defaults:
 
 ```sh
 cp .env.example .env
 ```
 
-For hosting, set `VITE_API_BASE_URL` to the public HTTPS URL of the Django API
-and rebuild the frontend. Do not add backend secrets, Supabase service-role
+For hosting, set the Sanity `VITE_*` variables in Vercel and rebuild the
+frontend. Product and contact enquiries work directly from the browser; no
+backend URL or secret is required.
 
 Product enquiries open WhatsApp with a prefilled message using the public
-business number. The visitor must press Send, and the Contact page email form
-continues to work separately. Do not add backend secrets, Supabase service-role
-keys, or Resend API keys to frontend environment variables.
+business number. The visitor must press Send in WhatsApp. The Contact page
+does the same after collecting name, email, phone number, and message. Do not
+add Sanity write tokens or other private keys to frontend environment variables.
