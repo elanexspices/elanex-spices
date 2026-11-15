@@ -1,6 +1,6 @@
 import {defineField, defineType} from "sanity";
 
-const qualityGroups = [
+export const qualityGroups = [
   {title: "Export Quality", value: "export"},
   {title: "Domestic Quality", value: "domestic"},
   {title: "Rejection / Mix", value: "rejection"},
@@ -26,53 +26,58 @@ export default defineType({
     }),
     defineField({name: "description", title: "Description", type: "text", rows: 4}),
     defineField({
-      name: "qualityPricing",
-      title: "Quality pricing",
+      name: "qualityGroups",
+      title: "Quality groups",
       type: "array",
-      description: "Add one row for every quality section where this product is sold.",
-      of: [
-        {
-          type: "object",
-          fields: [
-            defineField({
-              name: "qualityGroup",
-              title: "Quality group",
-              type: "string",
-              options: {list: qualityGroups, layout: "radio"},
-              validation: (rule) => rule.required(),
-            }),
-            defineField({
-              name: "price",
-              title: "Price (INR / kg)",
-              type: "number",
-              validation: (rule) => rule.required().min(0.01),
-            }),
-            defineField({
-              name: "image",
-              title: "Category-specific image (optional)",
-              type: "image",
-              description: "Leave empty to use the common product image.",
-              options: {hotspot: true},
-            }),
-          ],
-          preview: {
-            select: {title: "qualityGroup", subtitle: "price", media: "image"},
-            prepare: ({title, subtitle, media}) => ({
-              title: qualityGroups.find((group) => group.value === title)?.title ?? title,
-              subtitle: subtitle ? `₹${subtitle} / kg` : "Price not set",
-              media,
-            }),
-          },
-        },
-      ],
-      validation: (rule) =>
-        rule.required().min(1).custom((rows) => {
-          if (!rows) return true;
-          const groups = rows.map((row) => row.qualityGroup).filter(Boolean);
-          return new Set(groups).size === groups.length
-            ? true
-            : "Each quality group can be added only once.";
+      description: "Select every quality section where this product is available.",
+      of: [{type: "string"}],
+      options: {list: qualityGroups, layout: "checkbox"},
+      validation: (rule) => rule.required().min(1),
+    }),
+    defineField({
+      name: "qualityPrices",
+      title: "Prices by quality group (INR / kg)",
+      type: "object",
+      fields: [
+        defineField({
+          name: "export",
+          title: "Export Quality price",
+          type: "number",
+          validation: (rule) => rule.min(0.01),
+          hidden: ({document}) => !document?.qualityGroups?.includes("export"),
         }),
+        defineField({
+          name: "domestic",
+          title: "Domestic Quality price",
+          type: "number",
+          validation: (rule) => rule.min(0.01),
+          hidden: ({document}) => !document?.qualityGroups?.includes("domestic"),
+        }),
+        defineField({
+          name: "rejection",
+          title: "Rejection / Mix price",
+          type: "number",
+          validation: (rule) => rule.min(0.01),
+          hidden: ({document}) => !document?.qualityGroups?.includes("rejection"),
+        }),
+      ],
+      validation: (rule) => rule.custom((prices, context) => {
+        const selected = context.document?.qualityGroups ?? [];
+        return selected.every((group) => prices?.[group])
+          ? true
+          : "Add a price for every selected quality group.";
+      }),
+    }),
+    defineField({
+      name: "qualityImages",
+      title: "Images by quality group (optional)",
+      type: "object",
+      description: "Leave a category image empty to use the common product image.",
+      fields: [
+        defineField({name: "export", title: "Export Quality image", type: "image", options: {hotspot: true}}),
+        defineField({name: "domestic", title: "Domestic Quality image", type: "image", options: {hotspot: true}}),
+        defineField({name: "rejection", title: "Rejection / Mix image", type: "image", options: {hotspot: true}}),
+      ],
     }),
     defineField({
       name: "image",

@@ -31,11 +31,10 @@ npm run dev
 
 Open the local Studio URL shown in the terminal and sign in with the Sanity
 account. Add a product under **Product**. Product fields include name, URL ID, description, a common image, category,
-quality pricing rows, display order, and visibility. Add one quality pricing
-row for every applicable section: Export Quality, Domestic Quality, or
-Rejection / Mix. Each row has its own price per kilogram and can optionally
-have a category-specific image; otherwise the common image is used. The
-Products page renders the same product in each selected quality section.
+selected quality groups, prices by quality group, optional quality-specific
+images, display order, and visibility. Select one or more quality groups at
+once, then enter the price for each selected group. A quality-specific image
+can override the common image; otherwise the common image is used.
 
 If the Studio shows **This studio is not registered and cannot access your
 content yet**, verify all of the following:

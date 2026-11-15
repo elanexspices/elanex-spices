@@ -47,13 +47,8 @@ for (const product of products) {
     name: product.name,
     slug: { _type: "slug", current: product.id },
     description: product.description ?? "",
-    qualityPricing: [
-      {
-        _type: "qualityPricing",
-        qualityGroup: product.qualityGroup ?? "export",
-        price: Number(product.price),
-      },
-    ],
+    qualityGroups: [product.qualityGroup ?? "export"],
+    qualityPrices: { [product.qualityGroup ?? "export"]: Number(product.price) },
     image: {
       _type: "image",
       asset: { _type: "reference", _ref: asset._id },

@@ -7,9 +7,22 @@ type SanityProduct = {
   description: string | null;
   category: "cardamom" | "seeds";
   image: string;
-  qualityPrices: Array<{qualityGroup: QualityGroup; price: number; image: string}>;
+  qualityGroups?: QualityGroup[];
+  qualityPrices?: Partial<Record<QualityGroup, number>>;
+  qualityImages?: Partial<Record<QualityGroup, string>>;
+  legacyQualityPricing?: Array<{qualityGroup: QualityGroup; price: number; image: string}>;
+  price?: number;
+  qualityGroup?: QualityGroup;
 };
-export type Product = SanityProduct["qualityPrices"][number] & Omit<SanityProduct, "qualityPrices">;
+export type Product = {
+  id: string;
+  name: string;
+  description: string | null;
+  category: "cardamom" | "seeds";
+  qualityGroup: QualityGroup;
+  price: number;
+  image: string;
+};
 export let products: Product[] = [];
 export const money = (amount: number) => "₹" + amount.toLocaleString("en-IN");
 const WHATSAPP_NUMBER = "918921263343";
@@ -56,34 +69,50 @@ const PRODUCTS_QUERY = `*[
   description,
   category,
   "image": image.asset->url,
-  "qualityPrices": select(
-    defined(qualityPricing) => qualityPricing[]{
-      qualityGroup,
-      price,
-      "image": coalesce(image.asset->url, ^.image.asset->url)
-    },
-    [{
-      "qualityGroup": coalesce(qualityGroup, "export"),
-      price,
-      "image": image.asset->url
-    }]
-  )
+  qualityGroups,
+  qualityPrices,
+  "qualityImages": {
+    "export": qualityImages.export.asset->url,
+    "domestic": qualityImages.domestic.asset->url,
+    "rejection": qualityImages.rejection.asset->url
+  },
+  "legacyQualityPricing": qualityPricing[]{
+    qualityGroup,
+    price,
+    "image": coalesce(image.asset->url, ^.image.asset->url)
+  },
+  price,
+  qualityGroup
 }`;
 
 let productsRequest: Promise<Product[]> | null = null;
 
 function expandProducts(records: SanityProduct[]): Product[] {
-  return records.flatMap((record) =>
-    record.qualityPrices.map((qualityPrice) => ({
-      id: `${record.id}__${qualityPrice.qualityGroup}`,
-      name: record.name,
-      description: record.description,
-      category: record.category,
-      image: qualityPrice.image || record.image,
-      qualityGroup: qualityPrice.qualityGroup,
-      price: qualityPrice.price,
-    })),
-  );
+  return records.flatMap((record) => {
+    const groups = record.qualityGroups
+      ?? record.legacyQualityPricing?.map((entry) => entry.qualityGroup)
+      ?? [record.qualityGroup ?? "export"];
+    return groups.flatMap((group) => {
+      const price = record.qualityPrices?.[group]
+        ?? record.legacyQualityPricing?.find((entry) => entry.qualityGroup === group)?.price
+        ?? record.price;
+      if (typeof price !== "number") {
+        console.error(`Product "${record.id}" is missing a price for the ${group} quality group.`);
+        return [];
+      }
+      return [{
+        id: `${record.id}__${group}`,
+        name: record.name,
+        description: record.description,
+        category: record.category,
+        image: record.qualityImages?.[group]
+          ?? record.legacyQualityPricing?.find((entry) => entry.qualityGroup === group)?.image
+          ?? record.image,
+        qualityGroup: group,
+        price,
+      }];
+    });
+  });
 }
 
 function fetchProductsFromSanity(): Promise<Product[]> {
