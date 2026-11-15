@@ -1,5 +1,11 @@
 import {defineField, defineType} from "sanity";
 
+const qualityGroups = [
+  {title: "Export Quality", value: "export"},
+  {title: "Domestic Quality", value: "domestic"},
+  {title: "Rejection / Mix", value: "rejection"},
+];
+
 export default defineType({
   name: "product",
   title: "Product",
@@ -15,47 +21,65 @@ export default defineType({
       name: "slug",
       title: "Product URL ID",
       type: "slug",
-      options: {
-        source: "name",
-        maxLength: 180,
-      },
+      options: {source: "name", maxLength: 180},
       validation: (rule) => rule.required(),
     }),
+    defineField({name: "description", title: "Description", type: "text", rows: 4}),
     defineField({
-      name: "description",
-      title: "Description",
-      type: "text",
-      rows: 4,
-    }),
-    defineField({
-      name: "price",
-      title: "Indicative price (INR)",
-      type: "number",
-      validation: (rule) => rule.required().min(0.01),
-    }),
-    defineField({
-      name: "qualityGroup",
-      title: "Quality group",
-      type: "string",
-      description: "Controls which quality section shows this product.",
-      options: {
-        list: [
-          {title: "Export Quality", value: "export"},
-          {title: "Domestic Quality", value: "domestic"},
-          {title: "Rejection / Mix", value: "rejection"},
-        ],
-        layout: "radio",
-      },
-      initialValue: "export",
-      validation: (rule) => rule.required(),
+      name: "qualityPricing",
+      title: "Quality pricing",
+      type: "array",
+      description: "Add one row for every quality section where this product is sold.",
+      of: [
+        {
+          type: "object",
+          fields: [
+            defineField({
+              name: "qualityGroup",
+              title: "Quality group",
+              type: "string",
+              options: {list: qualityGroups, layout: "radio"},
+              validation: (rule) => rule.required(),
+            }),
+            defineField({
+              name: "price",
+              title: "Price (INR / kg)",
+              type: "number",
+              validation: (rule) => rule.required().min(0.01),
+            }),
+            defineField({
+              name: "image",
+              title: "Category-specific image (optional)",
+              type: "image",
+              description: "Leave empty to use the common product image.",
+              options: {hotspot: true},
+            }),
+          ],
+          preview: {
+            select: {title: "qualityGroup", subtitle: "price", media: "image"},
+            prepare: ({title, subtitle, media}) => ({
+              title: qualityGroups.find((group) => group.value === title)?.title ?? title,
+              subtitle: subtitle ? `₹${subtitle} / kg` : "Price not set",
+              media,
+            }),
+          },
+        },
+      ],
+      validation: (rule) =>
+        rule.required().min(1).custom((rows) => {
+          if (!rows) return true;
+          const groups = rows.map((row) => row.qualityGroup).filter(Boolean);
+          return new Set(groups).size === groups.length
+            ? true
+            : "Each quality group can be added only once.";
+        }),
     }),
     defineField({
       name: "image",
-      title: "Product image",
+      title: "Common product image",
       type: "image",
-      options: {
-        hotspot: true,
-      },
+      description: "Used for every quality row without its own image.",
+      options: {hotspot: true},
       validation: (rule) => rule.required(),
     }),
     defineField({
@@ -87,10 +111,7 @@ export default defineType({
     }),
   ],
   preview: {
-    select: {
-      title: "name",
-      subtitle: "qualityGroup",
-      media: "image",
-    },
+    select: {title: "name", media: "image"},
+    prepare: ({title, media}) => ({title, subtitle: "Product with quality pricing", media}),
   },
 });

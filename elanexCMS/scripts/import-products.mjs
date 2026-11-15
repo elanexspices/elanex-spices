@@ -47,13 +47,18 @@ for (const product of products) {
     name: product.name,
     slug: { _type: "slug", current: product.id },
     description: product.description ?? "",
-    price: Number(product.price),
+    qualityPricing: [
+      {
+        _type: "qualityPricing",
+        qualityGroup: product.qualityGroup ?? "export",
+        price: Number(product.price),
+      },
+    ],
     image: {
       _type: "image",
       asset: { _type: "reference", _ref: asset._id },
     },
     category: product.category,
-    qualityGroup: "export",
     available: true,
   });
 
